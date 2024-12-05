@@ -19,12 +19,18 @@
                 '[pod.babashka.buddy.core.crypto :as crypto]
                 '[pod.babashka.buddy.core.kdf :as kdf]))
 
-(defn-spec ^:private bytes->b64 ::vt/str [^bytes b ::vt/bytes]
+(defn-spec ^:private bytes->b64 ::vt/str
+  "Converts bytes into base 64"
+  [^bytes b ::vt/bytes]
   (String. (.encode (Base64/getEncoder) b)))
-(defn-spec  ^:private b64->bytes ::vt/bytes [^String s ::vt/str]
+(defn-spec  ^:private b64->bytes ::vt/bytes
+  "Converts base 64 into bytes"
+  [^String s ::vt/str]
   (.decode (Base64/getDecoder) (.getBytes s)))
 
-(defn-spec ^:private slow-key-stretch-with-pbkdf2 ::vt/bytes [weak-text-key ::vt/str n-bytes ::vt/long]
+(defn-spec ^:private slow-key-stretch-with-pbkdf2 ::vt/bytes
+  "Takes a weak text key and a number of bytes and stretches it."
+  [weak-text-key ::vt/str n-bytes ::vt/long]
   #?(:bb (kdf/get-engine-bytes
           {:key weak-text-key
            :salt (codecs/str->bytes *default-secret*)
@@ -108,6 +114,7 @@
    (get-in (decrypt-secrets! pass) (if-not (vector? k) [k] k))))
 
 (defmacro got-secret [k]
+  "Use instead of get-secret for secrets in compile time cljs."
   (do `(get-secret ~k)))
 
 (comment
